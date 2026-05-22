@@ -300,6 +300,26 @@ class CodexReviewHelperTests(unittest.TestCase):
         with self.assertRaises(self.delegate.DelegateSetupError):
             self.delegate.assemble_context(args, None)
 
+    def test_context_files_must_stay_under_cwd_boundary(self):
+        with temp_dir() as tmp:
+            root = pathlib.Path(tmp)
+            base = root / "base"
+            base.mkdir()
+            outside = root / "outside.txt"
+            outside.write_text("outside visible", encoding="utf-8")
+
+            with self.assertRaisesRegex(
+                self.delegate.DelegateSetupError,
+                "must resolve under cwd/workspace boundary",
+            ):
+                self.delegate.read_context_files(["../outside.txt"], 200, base)
+
+            with self.assertRaisesRegex(
+                self.delegate.DelegateSetupError,
+                "must resolve under cwd/workspace boundary",
+            ):
+                self.delegate.read_context_files([str(outside)], 200, base)
+
     def test_reserved_exec_file_and_stdin_invocations_do_not_put_prompt_in_argv(self):
         args = self.args()
         prompt = "FULL PROMPT SHOULD NOT BE IN ARGV"
@@ -334,6 +354,32 @@ class CodexReviewHelperTests(unittest.TestCase):
 
         self.assertEqual(invocation[:5], ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File"])
         self.assertEqual(invocation[-1], "mcp-server")
+
+    def test_review_cli_cmd_shim_prefers_sibling_powershell_shim(self):
+        with temp_dir() as tmp:
+            cmd = pathlib.Path(tmp) / "review-cli.cmd"
+            ps1 = pathlib.Path(tmp) / "review-cli.ps1"
+            cmd.write_text("@echo off\n", encoding="utf-8")
+            ps1.write_text("param()\n", encoding="utf-8")
+            with mock.patch.object(self.delegate, "review_cli_executable", return_value=str(cmd)):
+                with mock.patch.object(self.delegate.os, "name", "nt"):
+                    invocation = self.delegate.review_cli_command_invocation(["exec", "review&whoami"])
+
+        self.assertEqual(invocation[:5], ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File"])
+        self.assertEqual(pathlib.Path(invocation[5]).suffix.lower(), ".ps1")
+        self.assertIn("review&whoami", invocation)
+
+    def test_review_cli_cmd_shim_without_powershell_shim_fails_closed(self):
+        with temp_dir() as tmp:
+            cmd = pathlib.Path(tmp) / "review-cli.cmd"
+            cmd.write_text("@echo off\n", encoding="utf-8")
+            with mock.patch.object(self.delegate, "review_cli_executable", return_value=str(cmd)):
+                with mock.patch.object(self.delegate.os, "name", "nt"):
+                    with self.assertRaisesRegex(
+                        self.delegate.DelegateExecutableError,
+                        "refusing to invoke .cmd/.bat",
+                    ):
+                        self.delegate.review_cli_command_invocation(["exec", "review&whoami"])
 
     def test_transport_probe_reuses_windows_shim_wrapper(self):
         completed = mock.Mock(stdout="Usage: review-cli exec --prompt-file", stderr="")
@@ -608,6 +654,13 @@ class CodexReviewHelperTests(unittest.TestCase):
         self.assertNotIn("shell", tools[0]["name"])
         self.assertNotIn("command", tools[0]["name"])
 
+    def test_local_mcp_wrapper_reports_current_server_version(self):
+        result = self.delegate_mcp.handle_request(
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize"}
+        )
+
+        self.assertEqual(result["result"]["serverInfo"]["version"], "3")
+
     def test_local_mcp_wrapper_calls_delegate_runner_with_json_arguments(self):
         def fake_runner(arguments):
             return {"result": {"status": "ok", "task": arguments["task"]}}
@@ -656,6 +709,19 @@ class CodexReviewHelperTests(unittest.TestCase):
 
         self.assertEqual(result["result"]["status"], "setup_error")
         self.assertEqual(result["result"]["exit_code"], 2)
+
+    def test_local_mcp_wrapper_rejects_sensitive_inline_text_before_temp_file(self):
+        with mock.patch.object(self.delegate_mcp.subprocess, "run") as run:
+            result = self.delegate_mcp.run_delegate_review(
+                {
+                    "task": "Review packet.",
+                    "context_text": "API_TOKEN=abcdefghijklmnopqrstuvwxyz",
+                }
+            )
+
+        self.assertEqual(result["result"]["status"], "setup_error")
+        self.assertEqual(result["result"]["exit_code"], 2)
+        run.assert_not_called()
 
 
 if __name__ == "__main__":

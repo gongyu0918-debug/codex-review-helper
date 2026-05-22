@@ -8,9 +8,9 @@ Do not use the helper for private credentials, customer data, unpublished busine
 
 ## External CLI Review
 
-This repository is a Codex skill and helper script. It is not a DeepSeek official agent and is not affiliated with DeepSeek.
+This repository is a Codex skill and helper script. It is not an upstream model-provider official agent and is not affiliated with any model provider.
 
-The current transport can call the `deepseek` command installed by the third-party `Hmbown/DeepSeek-TUI` client. That npm wrapper launches downloaded release binaries, so review the installed package and binary provenance before use:
+The current transport can call the command named `deepseek` installed by the third-party `Hmbown/DeepSeek-TUI` client. That npm wrapper launches downloaded release binaries, so review the installed package and binary provenance before use:
 
 ```powershell
 where.exe deepseek
@@ -21,6 +21,8 @@ deepseek doctor
 The helper does not hide or bypass the external CLI or remote provider policy. If the configured provider cannot be trusted for a packet, do not send that packet.
 
 The helper invokes the configured CLI with telemetry disabled for that process, read-only sandbox mode, no approvals, and an isolated working directory. These controls reduce accidental disclosure, but they do not change the remote provider's data handling.
+
+Explicit context files are resolved under the configured working directory boundary. On Windows, the helper uses the installed release binary or PowerShell shim and refuses `.cmd`/`.bat` shims unless a same-name PowerShell shim can be used instead.
 
 Optional global hardening for the external CLI:
 
