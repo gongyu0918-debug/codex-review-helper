@@ -8,12 +8,14 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+import importlib.util
 from typing import Any, Callable
 
 
 JSONRPC = "2.0"
 TOOL_NAME = "codex_review_helper_review"
 SCRIPT_PATH = pathlib.Path(__file__).with_name("review_helper.py")
+_CORE_HELPER = None
 
 
 def response(request_id: Any, result: Any = None, error: dict | None = None) -> dict:
@@ -80,6 +82,25 @@ def tool_schema() -> dict:
     }
 
 
+def core_helper():
+    global _CORE_HELPER
+    if _CORE_HELPER is None:
+        spec = importlib.util.spec_from_file_location("review_helper_core", SCRIPT_PATH)
+        if spec is None or spec.loader is None:
+            raise ValueError("cannot load review helper core")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _CORE_HELPER = module
+    return _CORE_HELPER
+
+
+def reject_sensitive_inline_arguments(task: str, context_text: str | None) -> None:
+    helper = core_helper()
+    helper.reject_sensitive_text(task, "mcp task")
+    if context_text is not None:
+        helper.reject_sensitive_text(context_text, "mcp context_text")
+
+
 def validate_cwd(raw_cwd: Any) -> str | None:
     if raw_cwd in (None, ""):
         return None
@@ -120,6 +141,7 @@ def build_delegate_payload(arguments: dict) -> tuple[dict, int]:
     context_text = arguments.get("context_text")
     if context_text is not None and not isinstance(context_text, str):
         raise ValueError("context_text must be a string")
+    reject_sensitive_inline_arguments(task, context_text)
 
     timeout_seconds = int(arguments.get("timeout_seconds", 180))
     payload = {
@@ -215,7 +237,7 @@ def handle_request(
             {
                 "protocolVersion": "2025-03-26",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-review-helper", "version": "2"},
+                "serverInfo": {"name": "codex-review-helper", "version": "3"},
             },
         )
     if method == "notifications/initialized":

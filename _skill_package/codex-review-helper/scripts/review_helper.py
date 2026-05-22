@@ -547,18 +547,24 @@ def read_context_files(
 
     sections: list[str] = []
     remaining = max_chars
+    trusted_base = (base_dir or pathlib.Path.cwd()).expanduser().resolve()
 
     for raw_path in paths:
         path = pathlib.Path(raw_path).expanduser()
-        if base_dir and not path.is_absolute():
-            path = base_dir / path
-        if not path.exists():
+        resolved_path = (trusted_base / path).resolve() if not path.is_absolute() else path.resolve()
+        try:
+            resolved_path.relative_to(trusted_base)
+        except ValueError as exc:
+            raise DelegateSetupError(
+                f"context file must resolve under cwd/workspace boundary: {raw_path}"
+            ) from exc
+        if not resolved_path.exists():
             raise DelegateSetupError(f"context file not found: {raw_path}")
-        if not path.is_file():
+        if not resolved_path.is_file():
             raise DelegateSetupError(f"context path is not a file: {raw_path}")
 
-        text = path.read_text(encoding="utf-8", errors="replace")
-        reject_sensitive_text(text, f"context file {path}")
+        text = resolved_path.read_text(encoding="utf-8", errors="replace")
+        reject_sensitive_text(text, f"context file {resolved_path}")
         original_len = len(text)
         if remaining <= 0:
             excerpt = ""
@@ -575,7 +581,7 @@ def read_context_files(
         sections.append(
             "\n".join(
                 [
-                    f"### Context file: {path}",
+                    f"### Context file: {resolved_path}",
                     "```",
                     excerpt,
                     f"```{marker}",
@@ -709,8 +715,21 @@ def review_cli_command_invocation(command_args: list[str]) -> list[str]:
                 *command_args,
             ]
         if suffix in {".cmd", ".bat"}:
-            command_line = subprocess.list2cmdline([found, *command_args])
-            return ["cmd.exe", "/d", "/s", "/c", command_line]
+            ps1_shim = pathlib.Path(found).with_suffix(".ps1")
+            if ps1_shim.exists():
+                return [
+                    "powershell.exe",
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(ps1_shim),
+                    *command_args,
+                ]
+            raise DelegateExecutableError(
+                "refusing to invoke .cmd/.bat review CLI shim because it requires "
+                "cmd.exe /c string evaluation; install/use deepseek.exe or deepseek.ps1"
+            )
 
     return [found, *command_args]
 

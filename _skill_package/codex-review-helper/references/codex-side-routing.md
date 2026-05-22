@@ -4,7 +4,7 @@ Load this file when deciding whether Codex should use Codex Review Helper, keep 
 
 ## Rule
 
-Routing happens in Codex, not inside `review_helper.py`. Real helper calls use the configured Pro review model; the helper must not choose cheaper models automatically.
+Routing happens in Codex, not inside `review_helper.py`. Real helper calls use the configured review provider/model; the helper must not choose cheaper models automatically.
 
 ## Use Codex Review Helper
 

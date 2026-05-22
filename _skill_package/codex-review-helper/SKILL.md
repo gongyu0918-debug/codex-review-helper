@@ -5,7 +5,7 @@ description: "Single-packet read-only review helper for Codex. Use only for one 
 
 # Codex Review Helper
 
-Delegate one explicit packet to the user's configured local review CLI for advisory review while Codex keeps final judgment, file edits, and local verification. The current transport can call the `deepseek` command installed by the third-party Hmbown/DeepSeek-TUI client and pass `deepseek-v4-pro`; that is an unofficial client dependency, not a DeepSeek official agent or trigger surface.
+Delegate one explicit packet to the user's configured local review CLI for advisory review while Codex keeps final judgment, file edits, and local verification. The current transport can call the command named `deepseek` installed by the third-party Hmbown/DeepSeek-TUI client and pass a configured provider/model pair; that is an unofficial client dependency, not an upstream model-provider official agent or trigger surface.
 
 ## Contract
 
