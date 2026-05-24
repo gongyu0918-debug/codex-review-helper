@@ -10,7 +10,7 @@ Do not use the helper for private credentials, customer data, unpublished busine
 
 This repository is a Codex skill and helper script. It is not an upstream model-provider official agent and is not affiliated with any model provider.
 
-The current transport calls the third-party `Hmbown/CodeWhale` agent CLI, formerly named DeepSeek-TUI. CodeWhale is an independent terminal coding agent, not DeepSeek itself.
+The current transport calls the third-party `Hmbown/CodeWhale` agent CLI. CodeWhale is the updated successor of DeepSeek-TUI and is an independent terminal coding agent, not DeepSeek itself.
 
 The npm wrapper launches downloaded release binaries, so review the installed package and binary provenance before use:
 

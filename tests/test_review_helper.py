@@ -115,7 +115,7 @@ class CodexReviewHelperTests(unittest.TestCase):
         description = metadata["description"]
         self.assertIn("Single-packet read-only review helper", description)
         self.assertIn("CodeWhale", description)
-        self.assertIn("formerly DeepSeek-TUI", description)
+        self.assertIn("updated successor of DeepSeek-TUI", description)
         self.assertIn("not DeepSeek itself", description)
         self.assertIn("one bounded snippet, diff, log", description)
         self.assertIn("Do not use for implementation", description)

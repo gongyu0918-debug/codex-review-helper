@@ -1,11 +1,11 @@
 ---
 name: codex-review-helper
-description: "Single-packet read-only review helper for Codex through CodeWhale. Use only for one bounded snippet, diff, log, config, or short prose packet when Codex needs an external second opinion verifiable from the packet alone. Requires a working CodeWhale agent CLI; CodeWhale was formerly DeepSeek-TUI and is not DeepSeek itself. Do not use for implementation, full-repo review, architecture, security-owned decisions, migrations, secrets, broad conversation handoff, native Codex subagent work, training/evaluation datasets, bulk or batch delegation, model routing, data collection, A/B ablation, or calibration."
+description: "Single-packet read-only review helper for Codex through CodeWhale. Use only for one bounded snippet, diff, log, config, or short prose packet when Codex needs an external second opinion verifiable from the packet alone. Requires a working CodeWhale agent CLI; CodeWhale is the updated successor of DeepSeek-TUI and is not DeepSeek itself. Do not use for implementation, full-repo review, architecture, security-owned decisions, migrations, secrets, broad conversation handoff, native Codex subagent work, training/evaluation datasets, bulk or batch delegation, model routing, data collection, A/B ablation, or calibration."
 ---
 
 # Codex Review Helper
 
-Delegate one explicit packet to the user's configured CodeWhale agent CLI for advisory review while Codex keeps final judgment, file edits, and local verification. CodeWhale is an independent terminal coding agent, closer in category to Codex or Claude Code than to a model provider. It was formerly named DeepSeek-TUI, but do not describe this helper as using DeepSeek itself.
+Delegate one explicit packet to the user's configured CodeWhale agent CLI for advisory review while Codex keeps final judgment, file edits, and local verification. CodeWhale is the updated successor of DeepSeek-TUI and remains an independent terminal coding agent, closer in category to Codex or Claude Code than to a model provider. Do not describe this helper as using DeepSeek itself.
 
 ## Contract
 

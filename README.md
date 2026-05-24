@@ -4,7 +4,7 @@ Single-packet review helper for Codex.
 
 This skill lets Codex ask a configured CodeWhale agent CLI for one read-only second opinion on a small review packet. Codex remains the host: it chooses whether to call the helper, verifies every finding locally, and accepts or rejects the result inside the Codex thread.
 
-The required companion tool is the third-party [Hmbown/CodeWhale](https://github.com/Hmbown/CodeWhale) project, formerly named DeepSeek-TUI. CodeWhale is an independent terminal coding agent, closer in category to Codex or Claude Code than to a model provider. Do not describe this helper as using DeepSeek itself; CodeWhale can use different providers, and the old project name should not be treated as the model provider name.
+The required companion tool is the third-party [Hmbown/CodeWhale](https://github.com/Hmbown/CodeWhale) project. CodeWhale is the updated successor of DeepSeek-TUI. It is an independent terminal coding agent, closer in category to Codex or Claude Code than to a model provider. Do not describe this helper as using DeepSeek itself; CodeWhale can use different providers, and the old project name should not be treated as the model provider name.
 
 ## Compatibility
 
