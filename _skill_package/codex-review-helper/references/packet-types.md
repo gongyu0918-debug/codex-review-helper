@@ -18,4 +18,4 @@ Load this file when building a single Codex Review Helper packet.
 
 - Keep one evidence boundary per packet when possible: a diff hunk, log incident, config excerpt, snippet, or prose section.
 - Preserve ids, paths, URLs, source names, line numbers, and timestamps inside the packet when they support the requested review.
-- If the packet is too large for the active transport, shrink it or keep the work in Codex. Do not split it into repeated external CLI calls.
+- If the packet is too large for the active transport, shrink it or keep the work in Codex. Do not split it into repeated CodeWhale calls.

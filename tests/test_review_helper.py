@@ -9,9 +9,6 @@ import unittest
 import uuid
 from unittest import mock
 
-import yaml
-
-
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SKILL_PATH = ROOT / "_skill_package" / "codex-review-helper" / "SKILL.md"
 REFERENCE_DIR = ROOT / "_skill_package" / "codex-review-helper" / "references"
@@ -46,6 +43,16 @@ def load_mcp_module():
     assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
+
+
+def parse_simple_frontmatter(text):
+    metadata = {}
+    for line in text.splitlines():
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        metadata[key.strip()] = value.strip().strip('"')
+    return metadata
 
 
 def temp_dir():
@@ -102,12 +109,14 @@ class CodexReviewHelperTests(unittest.TestCase):
     def test_skill_frontmatter_is_parseable_and_trigger_is_narrow(self):
         text = SKILL_PATH.read_text(encoding="utf-8")
         frontmatter = text.split("---", 2)[1]
-        metadata = yaml.safe_load(frontmatter)
+        metadata = parse_simple_frontmatter(frontmatter)
 
         self.assertEqual(metadata["name"], "codex-review-helper")
         description = metadata["description"]
         self.assertIn("Single-packet read-only review helper", description)
-        self.assertNotIn("DeepSeek", description)
+        self.assertIn("CodeWhale", description)
+        self.assertIn("formerly DeepSeek-TUI", description)
+        self.assertIn("not DeepSeek itself", description)
         self.assertIn("one bounded snippet, diff, log", description)
         self.assertIn("Do not use for implementation", description)
         self.assertIn("full-repo review", description)
@@ -380,6 +389,14 @@ class CodexReviewHelperTests(unittest.TestCase):
                         "refusing to invoke .cmd/.bat",
                     ):
                         self.delegate.review_cli_command_invocation(["exec", "review&whoami"])
+
+    def test_missing_codewhale_cli_reports_install_guidance(self):
+        with mock.patch.object(self.delegate, "review_cli_executable", return_value=None):
+            with self.assertRaisesRegex(
+                self.delegate.DelegateExecutableError,
+                "CodeWhale agent CLI was not found",
+            ):
+                self.delegate.review_cli_command_invocation(["exec", "review packet"])
 
     def test_transport_probe_reuses_windows_shim_wrapper(self):
         completed = mock.Mock(stdout="Usage: review-cli exec --prompt-file", stderr="")

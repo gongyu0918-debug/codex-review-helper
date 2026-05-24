@@ -1,18 +1,19 @@
 ---
 name: codex-review-helper
-description: "Single-packet read-only review helper for Codex. Use only for one bounded snippet, diff, log, config, or short prose packet when Codex needs an external second opinion verifiable from the packet alone. Do not use for implementation, full-repo review, architecture, security-owned decisions, migrations, secrets, broad conversation handoff, native Codex subagent work, training/evaluation datasets, bulk or batch delegation, model routing, data collection, A/B ablation, or calibration."
+description: "Single-packet read-only review helper for Codex through CodeWhale. Use only for one bounded snippet, diff, log, config, or short prose packet when Codex needs an external second opinion verifiable from the packet alone. Requires a working CodeWhale agent CLI; CodeWhale was formerly DeepSeek-TUI and is not DeepSeek itself. Do not use for implementation, full-repo review, architecture, security-owned decisions, migrations, secrets, broad conversation handoff, native Codex subagent work, training/evaluation datasets, bulk or batch delegation, model routing, data collection, A/B ablation, or calibration."
 ---
 
 # Codex Review Helper
 
-Delegate one explicit packet to the user's configured local review CLI for advisory review while Codex keeps final judgment, file edits, and local verification. The current transport can call the command named `deepseek` installed by the third-party Hmbown/DeepSeek-TUI client and pass a configured provider/model pair; that is an unofficial client dependency, not an upstream model-provider official agent or trigger surface.
+Delegate one explicit packet to the user's configured CodeWhale agent CLI for advisory review while Codex keeps final judgment, file edits, and local verification. CodeWhale is an independent terminal coding agent, closer in category to Codex or Claude Code than to a model provider. It was formerly named DeepSeek-TUI, but do not describe this helper as using DeepSeek itself.
 
 ## Contract
 
-- Use the external CLI only as a bounded helper reviewer, not an authority, owner, trainer, or data collection target.
-- Use the configured review CLI as a single external reviewer. Do not add cheap-model routing in this helper.
+- Use CodeWhale only as a bounded helper reviewer, not an authority, owner, trainer, or data collection target.
+- Use the configured CodeWhale agent CLI as a single helper reviewer. Do not add cheap-model routing in this helper.
+- Use this skill only after CodeWhale is installed, has a configured provider/model, and has a valid API key in its own configuration.
 - Send only the smallest explicit packet that contains the task, constraints, and evidence.
-- The external CLI receives only `task`, optional `context_text`, contents of listed `context_files`, and helper framing. It does not receive Codex hidden prompts, GPT conversation history, memory, repo files not attached, environment variables, credentials, cookies, or browser/session data.
+- CodeWhale receives only `task`, optional `context_text`, contents of listed `context_files`, and helper framing. It does not receive Codex hidden prompts, GPT conversation history, memory, repo files not attached, environment variables, credentials, cookies, or browser/session data.
 - Keep all calls read-only and non-interactive. Do not drive the visual TUI, browser UI, OCR, screenshots, or terminal screen scraping.
 - Never pass secrets, credential files, cookies, unrelated personal data, broad conversation history, training/evaluation datasets, collected model outputs, or bulk task queues.
 - Do not use this skill for batch review, map/reduce delegation, automated scoring, or repeated corpus processing.
@@ -24,7 +25,7 @@ Good fits:
 
 - Compact diffs, snippets, configs, logs, plans, or short prose that can be reviewed from the packet alone.
 - Second-pass code or wording review where findings can cite packet evidence.
-- One-off Chinese prose review when the text section is small, explicit, and safe to disclose to the configured external CLI.
+- One-off Chinese prose review when the text section is small, explicit, and safe to disclose to CodeWhale.
 
 Bad fits:
 
@@ -36,6 +37,15 @@ Bad fits:
 ## How To Call
 
 Default to the installed helper with a JSON request file for larger packets. Use `--structured-result` for new automation and keep `--json-result` for the machine-readable envelope.
+
+Prerequisite check:
+
+```powershell
+where.exe codewhale
+codewhale doctor
+```
+
+Keep API keys inside CodeWhale configuration. Never put keys in the task, JSON packet, context files, or output.
 
 ```powershell
 python "$env:USERPROFILE\.codex\skills\codex-review-helper\scripts\review_helper.py" `

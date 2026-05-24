@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tiny stdio MCP wrapper for one-packet Codex review helper packets."""
+"""Tiny stdio MCP wrapper for one-packet CodeWhale review helper packets."""
 
 from __future__ import annotations
 
@@ -50,7 +50,8 @@ def tool_schema() -> dict:
     return {
         "name": TOOL_NAME,
         "description": (
-            "Run one bounded, read-only external CLI advisory review. "
+            "Run one bounded, read-only CodeWhale advisory review. "
+            "CodeWhale is an independent agent CLI, formerly DeepSeek-TUI, not DeepSeek itself. "
             "Use only for a single explicit packet second opinion; not for shell, edits, "
             "full-repo work, batch jobs, training data, evaluation data, or ablation."
         ),

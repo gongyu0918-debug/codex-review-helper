@@ -8,7 +8,7 @@ Load this file only when `SKILL.md` is not enough to choose the right packet sha
 - `privacy-boundary.md`: load before any new task category, data source, repeated workflow, or host integration is allowed to use this skill.
 - `packet-types.md`: load when building a single task packet or deciding what evidence it must contain.
 - `codex-side-routing.md`: load when deciding whether Codex should use this skill, keep the task local, or use a native subagent.
-- `agent-cli-delegation.md`: load when comparing native Codex subagents, MCP tools, Claude Code/OpenClaw patterns, or the external CLI adapter.
+- `agent-cli-delegation.md`: load when comparing native Codex subagents, MCP tools, Claude Code/OpenClaw patterns, or the CodeWhale CLI adapter.
 - `transport-patterns.md`: load when choosing `--input-json`, optional MCP wrapper use, or backend transport.
 - `chinese-prose.md`: load only for bounded Chinese wording, tone, fluency, ambiguity, or fact-risk review.
 

@@ -10,7 +10,7 @@ Routing happens in Codex, not inside `review_helper.py`. Real helper calls use t
 
 - Bounded snippets, diffs, logs, configs, or short prose packets.
 - Second opinions where all evidence can fit in the packet.
-- One-off helper reviews where the user would be comfortable sending the explicit packet to the configured external CLI.
+- One-off helper reviews where the user would be comfortable sending the explicit packet to CodeWhale.
 
 ## Keep In Codex Or Native Subagents
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Delegate one small bounded packet to a configured external review CLI."""
+"""Delegate one small bounded packet to a configured CodeWhale agent CLI."""
 
 from __future__ import annotations
 
@@ -204,7 +204,7 @@ BATCH_DISABLED_MESSAGE = (
 
 def parse_args() -> argparse.Namespace:
     parser = DelegateArgumentParser(
-        description="Call the configured review CLI with a compact delegation packet."
+        description="Call CodeWhale with a compact review packet."
     )
     parser.add_argument(
         "--input-json",
@@ -246,14 +246,14 @@ def parse_args() -> argparse.Namespace:
         "--provider",
         default="deepseek",
         help=(
-            "Provider id to pass to the configured review CLI before exec. "
-            "The default matches the provider id used by the configured third-party CLI."
+            "Provider id to pass through to CodeWhale before exec. "
+            "CodeWhale is the independent agent CLI; it is not DeepSeek itself."
         ),
     )
     parser.add_argument(
         "--model",
         default="deepseek-v4-pro",
-        help="Model id to pass through to the configured review CLI before exec.",
+        help="Model id to pass through to the configured CodeWhale agent CLI before exec.",
     )
     parser.add_argument(
         "--sandbox-mode",
@@ -271,7 +271,7 @@ def parse_args() -> argparse.Namespace:
         default="auto",
         help=(
             "Prompt transport. auto currently resolves to exec-argv; "
-            "exec-file/stdin are reserved until the configured CLI exposes prompt-file or stdin support."
+            "exec-file/stdin are reserved until CodeWhale exposes prompt-file or stdin support."
         ),
     )
     parser.add_argument(
@@ -284,7 +284,7 @@ def parse_args() -> argparse.Namespace:
         "--timeout-seconds",
         type=int,
         default=180,
-        help="Timeout for each external CLI call.",
+        help="Timeout for each CodeWhale call.",
     )
     parser.add_argument(
         "--mcp-probe-timeout-seconds",
@@ -517,7 +517,7 @@ def validate_provider_model(args: argparse.Namespace, parser: argparse.ArgumentP
     if args.provider != "deepseek" and args.model.startswith("deepseek-"):
         argument_error(
             args,
-            "the configured provider requires an explicit compatible --model; "
+            "the configured CodeWhale provider requires an explicit compatible --model; "
             f"got provider={args.provider!r} model={args.model!r}"
         )
 
@@ -683,24 +683,37 @@ def review_cli_executable() -> str | None:
     if os.name == "nt":
         appdata = os.environ.get("APPDATA")
         if appdata:
-            downloads = pathlib.Path(appdata) / "npm" / "node_modules" / "deepseek-tui" / "bin" / "downloads"
-            for name in ("deepseek.exe", "deepseek-tui.exe"):
-                candidate = downloads / name
-                if candidate.exists():
-                    return str(candidate)
-        for name in ("deepseek.exe", "deepseek-tui.exe", "deepseek.ps1", "deepseek.cmd", "deepseek"):
+            for package in ("codewhale",):
+                downloads = pathlib.Path(appdata) / "npm" / "node_modules" / package / "bin" / "downloads"
+                for name in ("codewhale.exe", "codewhale-tui.exe"):
+                    candidate = downloads / name
+                    if candidate.exists():
+                        return str(candidate)
+        for name in (
+            "codewhale.exe",
+            "codewhale-tui.exe",
+            "codewhale.ps1",
+            "codewhale-tui.ps1",
+            "codewhale.cmd",
+            "codewhale",
+        ):
             found = shutil.which(name)
             if found:
                 return found
         return None
 
-    return shutil.which("deepseek")
+    return shutil.which("codewhale") or shutil.which("codewhale-tui")
 
 
 def review_cli_command_invocation(command_args: list[str]) -> list[str]:
     found = review_cli_executable()
     if not found:
-        return ["deepseek", *command_args]
+        raise DelegateExecutableError(
+            "CodeWhale agent CLI was not found. Install Hmbown/CodeWhale "
+            "and configure a provider/model with a valid API key first. The command "
+            "should be named codewhale; CodeWhale was formerly DeepSeek-TUI, "
+            "but it is not DeepSeek itself."
+        )
 
     suffix = pathlib.Path(found).suffix.lower()
     if os.name == "nt":
@@ -727,8 +740,9 @@ def review_cli_command_invocation(command_args: list[str]) -> list[str]:
                     *command_args,
                 ]
             raise DelegateExecutableError(
-                "refusing to invoke .cmd/.bat review CLI shim because it requires "
-                "cmd.exe /c string evaluation; install/use deepseek.exe or deepseek.ps1"
+                "refusing to invoke .cmd/.bat CodeWhale shim because it requires "
+                "cmd.exe /c string evaluation; install/use a CodeWhale .exe or "
+                "PowerShell shim such as codewhale.exe or codewhale.ps1"
             )
 
     return [found, *command_args]
@@ -808,7 +822,7 @@ def resolve_backend_transport(args: argparse.Namespace, driver: str) -> str:
         if review_cli_exec_supports_transport(requested):
             return requested
         raise DelegateSetupError(
-            f"backend transport {requested} is reserved, but the configured CLI "
+            f"backend transport {requested} is reserved, but CodeWhale "
             "does not advertise prompt-file/stdin support"
         )
     raise DelegateSetupError(f"unknown backend transport: {requested}")
@@ -825,7 +839,7 @@ def backend_allows_single_packet(args: argparse.Namespace, prompt: str, backend_
 
 
 def create_isolated_delegate_cwd() -> tuple[str, str | None]:
-    """Create an empty cwd for the downstream CLI so it cannot start inside the repo."""
+    """Create an empty cwd for CodeWhale so it cannot start inside the repo."""
     requested_root = os.environ.get("CODEX_REVIEW_HELPER_RUNTIME_DIR")
     roots: list[pathlib.Path] = []
     if requested_root:

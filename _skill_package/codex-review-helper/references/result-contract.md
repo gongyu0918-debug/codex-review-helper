@@ -4,7 +4,7 @@ Load this file when changing `--structured-result`, interpreting `--json-result`
 
 ## Delegate Output
 
-With `--structured-result`, the external CLI should return one fenced JSON object:
+With `--structured-result`, CodeWhale should return one fenced JSON object:
 
 ```json
 {
@@ -46,4 +46,4 @@ The result envelope also reports transport metadata:
 
 Codex may use a finding only after it verifies the cited packet evidence or reproduces the suggested check locally. Treat uncited claims, broad advice, style-only rewrites, or findings that depend on missing context as advisory noise.
 
-Do not send helper results back to the external CLI for grading, correction, prompt tuning, or calibration. Codex accepts or rejects findings inside the Codex thread.
+Do not send helper results back to CodeWhale for grading, correction, prompt tuning, or calibration. Codex accepts or rejects findings inside the Codex thread.

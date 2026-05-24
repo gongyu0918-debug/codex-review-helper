@@ -12,7 +12,7 @@ Load this file only when Codex Review Helper is being used for bounded Chinese p
 ## Boundaries
 
 - Do not send secrets, private credentials, unrelated user data, or broad conversation history.
-- Do not ask the external CLI to rewrite a whole long document. Use one small section only, or keep the work in Codex.
+- Do not ask CodeWhale to rewrite a whole long document. Use one small section only, or keep the work in Codex.
 - Do not treat the helper as the final authority on law, medicine, finance, policy, current facts, or organization-specific truth.
 - Do not accept style-only smoothing that changes named facts, obligations, amounts, dates, titles, or attribution.
 

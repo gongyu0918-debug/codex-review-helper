@@ -40,12 +40,12 @@ Do not register this wrapper as a broad always-on MCP suite. A single narrow too
 ## Backend Transport
 
 - Current default: `exec-argv`, because the current supported CLI exposes only an argv prompt path.
-- Reserved only: `exec-file` and `exec-stdin`. Enable them only after the configured CLI advertises prompt-file or stdin support.
-- MCP probing is valid only when the configured CLI exposes a real delegate/review tool through `tools/list`.
+- Reserved only: `exec-file` and `exec-stdin`. Enable them only after CodeWhale advertises prompt-file or stdin support.
+- MCP probing is valid only when CodeWhale exposes a real delegate/review tool through `tools/list`.
 
 ## Packet Size
 
 - Attempt one explicit packet only.
 - With current `exec-argv`, keep the conservative prompt-size guard.
-- If a packet is too large, shrink it or keep the review in Codex. Do not fall back to repeated external CLI calls.
+- If a packet is too large, shrink it or keep the review in Codex. Do not fall back to repeated CodeWhale calls.
 - Treat `chunk_reason` in the JSON envelope as a setup-failure explanation, not permission to batch.
